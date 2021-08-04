@@ -1,0 +1,28 @@
+extends layout.pug
+
+block content
+  h2 Users
+  each user in users
+    span.is-size-6.inline= user.id
+    a(href=`${_CC.config.base}admin-settings/edit/${user.id}`)
+      span.is-size-7.icon.has-text-info
+        i.fas.fa-edit
+      span.is-sr-only
+        | Edit
+    br
+  h3 Add user
+  form(action=`${_CC.config.base}admin-settings/add`, method='POST')
+    .field
+      label.label Username
+      .control.has-icons-left
+        input.input(type='text', name='newUserUsername', placeholder='john')
+        span.icon.is-small.is-left
+          i.fas.fa-user
+    .field
+      .control
+        input.button.is-primary(type='submit' value='Add User')
+  h3 Version Info
+  p Christmas Community: v#{_CC.require('./package.json').version}
+  p Get Product Data: v#{_CC.package.version}
+  p Node: #{process.version}
+  p PID: #{process.pid}

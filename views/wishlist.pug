@@ -1,0 +1,239 @@
+extends layout.pug
+
+block title
+  h1
+    .level
+      .level-left
+        .level-item
+          button.button.is-rounded(onclick='this.firstChild.firstChild.classList.add("fa-pulse"); location.reload()')
+            span.icon
+              i.fas.fa-sync-alt
+        .level-item
+          span  #{config.siteTitle} - #{title} 
+
+block content
+  script(type='data/user_id')= req.user._id
+  if global._CC.config.wishlist.table
+    .box
+      table.table.has-mobile-cards
+        thead
+          th(style='width: 15%;') Foto
+          th(style='width: 25%;') Naam
+          th(style='width: 50%;') Informatie
+          th(style='width: 10%;') Prijs
+          th Bewerken
+          th Toegevoegd Door
+          if req.params.user === req.user._id
+            th Naar Top
+            th Naar Boven
+            th Naar Beneden
+          else
+            th Belooft
+          th Verwijder
+        tbody
+          each item, index in wishlist
+            if req.user._id === item.addedBy || req.params.user !== req.user._id
+              tr(id=item.id)
+                td
+                  figure(style='width: 100%; margin: 0;')
+                    img(src=item.image, style='width: 100%; max-height: 20em; object-fit: contain;')
+                if item.url
+                  td.ugc(data-label='Naam')
+                    a(
+                      href=item.url,
+                      rel='noopener noreferrer',
+                      target='_blank'
+                    )= (item.name ? item.name : item.url)
+                else
+                  td.ugc(data-label='Naam')= item.name
+                if _CC.config.wishlist.note.markdown
+                  td.ugc(data-label='Informatie')
+                    div!= item.note
+                else
+                  td.ugc(data-label='Informatie')= item.note
+                td.ugc(data-label='Prijs')= item.price
+                td(data-label='Cadeau bewerken')
+                  form.inline(method='GET', action=`${_CC.config.base}wishlist/${req.params.user}/note/${item.id}`)
+                    .field.inline
+                      .control.inline
+                        button.button.is-text(
+                          type='submit',
+                          style='text-decoration: none;'
+                          disabled=item.addedBy !== req.user._id
+                        )
+                          span.icon
+                            i.far.fa-edit
+                td.ugc(data-label='Toegevoegd door')= item.addedBy
+                if req.params.user === req.user._id
+                  td(data-label='Naar bovenste')
+                    form.topForm.inline(method='POST', action=`${_CC.config.base}wishlist/${req.params.user}/move/top/${item.id}`)
+                      .field.inline
+                        .control.inline
+                          button.button.is-text(
+                            type='submit',
+                            style='text-decoration: none;',
+                            disabled=index === firstCanSee
+                          )
+                            span.icon
+                              i.fas.fa-angle-double-up
+                  td(data-label='Naar boven')
+                    form.upForm.inline(method='POST', action=`${_CC.config.base}wishlist/${req.params.user}/move/up/${item.id}`)
+                      .field.inline
+                        .control.inline
+                          button.button.is-text(
+                            type='submit',
+                            style='text-decoration: none;',
+                            disabled=index === firstCanSee
+                          )
+                            span.icon
+                              i.fas.fa-arrow-up
+                  td(data-label='Naar beneden')
+                    form.downForm.inline(method='POST', action=`${_CC.config.base}wishlist/${req.params.user}/move/down/${item.id}`)
+                      .field.inline
+                        .control.inline
+                          button.button.is-text(
+                            type='submit',
+                            style='text-decoration: none;',
+                            disabled=index === lastCanSee
+                          )
+                            span.icon
+                              i.fas.fa-arrow-down
+                else
+                  td(data-label='Belooft')
+                    if req.params.user !== req.user._id && !item.pledgedBy
+                      form.inline(method='POST', action=`${_CC.config.base}wishlist/${req.params.user}/pledge/${item.id}`)
+                        .field.inline
+                          .control.inline
+                            input.inline.button.is-primary(type='submit' value='Beloven')
+                    if item.pledgedBy === req.user._id
+                      form.inline(method='POST', action=`${_CC.config.base}wishlist/${req.params.user}/unpledge/${item.id}`)
+                        .field.inline
+                          .control.inline
+                            input.inline.button(type='submit' value='Ongedaan maken')
+                    if item.pledgedBy && item.pledgedBy !== req.user._id
+                      span.ugc Pledged for by #{item.pledgedBy}
+                td(data-label='Verwijder Cadeau')
+                  form.inline(
+                    method='POST',
+                    action=`${_CC.config.base}wishlist/${req.params.user}/${req.user._id === req.params.user ? 'remove' : 'unpledge'}/${item.id}`
+                  )
+                    .field.inline
+                      .control.inline
+                        button.button.is-text(
+                          type='submit',
+                          style='text-decoration: none;',
+                          disabled=item.addedBy !== req.user._id
+                        )
+                          span.icon
+                            i.fas.fa-trash
+
+  else
+    each item, index in wishlist
+      if req.user._id === item.addedBy || req.params.user !== req.user._id
+        .box
+          if item.price
+            .tag
+              i.fas.fa-tag(style='margin-right: .5em;')
+              span= item.price
+          span.overflowWrap
+            if item.price
+              span= ' '
+            if item.url
+              a(
+                href=item.url,
+                rel='noopener noreferrer',
+                target='_blank'
+              )= (item.name ? item.name : item.url)
+            else
+              span= item.name
+          hr
+          if item.note || item.image
+            .columns
+              if item.image
+                .column
+                  figure(style='width: 100%; padding: 2em;')
+                    img(src=item.image, style='width: 100%;')
+              .column.is-three-quarters
+                if item.note
+                  textarea.textarea.has-fixed-size(
+                    style='height: 100%;'
+                    readonly
+                  )= item.note
+          span.overflowWrap Added by: #{item.addedBy}
+          hr
+          div
+            if req.params.user !== req.user._id && !item.pledgedBy
+              form.inline(method='POST', action=`${_CC.config.base}wishlist/${req.params.user}/pledge/${item.id}`)
+                .field.inline
+                  .control.inline
+                    input.inline.button.is-primary(type='submit' value='Pledge')
+            if item.pledgedBy === req.user._id
+              form.inline(method='POST', action=`${_CC.config.base}wishlist/${req.params.user}/unpledge/${item.id}`)
+                .field.inline
+                  .control.inline
+                    input.inline.button(type='submit' value='Unpledge')
+            if req.user._id === req.params.user
+              form.inline(method='POST', action=`${_CC.config.base}wishlist/${req.params.user}/remove/${item.id}`)
+                .field.inline
+                  .control.inline
+                    input.inline.button.is-warning(type='submit' value='Remove')
+            if req.user._id === req.params.user || req.user._id === item.addedBy
+              form.inline(method='GET', action=`${_CC.config.base}wishlist/${req.params.user}/note/${item.id}`)
+                .field.inline
+                  .control.inline
+                    input.inline.button(type='submit', value='Edit item')
+              if index !== firstCanSee && req.user._id === req.params.user
+                form.inline(method='POST', action=`${_CC.config.base}wishlist/${req.params.user}/move/up/${item.id}`)
+                  .field.inline
+                    .control.inline
+                      input.inline.button(type='submit' value='Move item up')
+              if index !== lastCanSee && req.user._id === req.params.user
+                form.inline(method='POST', action=`${_CC.config.base}wishlist/${req.params.user}/move/down/${item.id}`)
+                  .field.inline
+                    .control.inline
+                      input.inline.button(type='submit' value='Move item down')
+  form(method='POST')
+    .field
+      label.label Cadeau Naam of URL (Link)
+      .control.has-icons-left
+        input.input(
+          type='text',
+          name='itemUrlOrName',
+          placeholder='https://www.bol.com/'
+        )
+        span.icon.is-small.is-left
+          i.fas.fa-gift
+    .field
+      label.label Informatie
+      .control
+        textarea.textarea(
+          name='note',
+          placeholder='Optioneel'
+        )
+    .field
+      .control
+        input.button(type='submit' value=(req.user._id === req.params.user ? 'Cadeau toevoegen' : 'Toevoegen'))
+  script(src=`${_CC.config.base}js/wishlist.js`)
+
+block print
+  h1 #{req.params.user}'s Wishlist
+  .print-gifts
+    each item, index in wishlist.filter(item => item.addedBy === req.params.user)
+      .print-gift(style='page-break-inside: avoid;')
+        if index > 0
+          hr(style='margin-top: .5em; margin-bottom: .5em; background-color: black;')
+        if item.price
+          .tag
+            i.fas.fa-tag(style='margin-right: .5em;')
+            span= item.price
+          span= ' '
+        span.is-size-6.ugc= item.name
+        span= ' '
+        span.ugc.has-text-grey= item.url
+        span.is-block Added by: #{item.addedBy}
+        if item.note
+          .box
+            if _CC.config.wishlist.note.markdown
+              span.is-block.ugc!= item.note
+            else
+              span.is-block.ugc= item.note

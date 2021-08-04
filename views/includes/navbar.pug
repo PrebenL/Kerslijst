@@ -1,0 +1,38 @@
+mixin navBarLink(href, title)
+  if href === req.path
+    a.is-active.navbar-item(href=href)= title
+  else
+    a.navbar-item(href=href)= title
+nav.navbar.is-fixed-top(role='navigation', aria-label='main navigation',style='box-shadow: 0px 0px 7px rgb(14, 15, 17);')
+  .navbar-brand
+    if _CC.config.base === req.path
+      a.is-active.navbar-item(href=_CC.config.base)
+        img(src=`${_CC.config.base}img/logo.png`, alt='')
+        span #{config.siteTitle}
+    else
+      a.navbar-item(href=_CC.config.base)
+        img(src=`${_CC.config.base}img/logo.png`, alt='')
+        span #{config.siteTitle}
+    a.navbar-burger#navBarBurger(role='button', aria-label='menu', aria-expanded='false')
+      span(aria-hidden='true')
+      span(aria-hidden='true')
+      span(aria-hidden='true')
+  .navbar-menu#navBarMenu
+    .navbar-start
+      if req.isAuthenticated()
+        if req.user._id === 'Unknown'
+          .navbar-item
+            a.button.is-primary(href='/login') Log In
+        else
+          .navbar-item.has-dropdown.is-hoverable
+            a.navbar-link= req.user._id
+            .navbar-dropdown
+              +navBarLink(`${_CC.config.base}wishlist/${req.user._id}`, 'Mijn lijst')
+              +navBarLink(`${_CC.config.base}profile`, 'Profiel')
+              if req.user.admin
+                +navBarLink(`${_CC.config.base}admin-settings`, 'Admin settings')
+              hr.navbar-divider
+              .navbar-item
+                form#logoutForm(action=`${_CC.config.base}logout`, method='POST')
+                  button.button.is-warning(type='submit') Log Out
+  script(src=`${_CC.config.base}js/nav.js`)

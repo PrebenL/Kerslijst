@@ -1,0 +1,40 @@
+extends layout.pug
+
+block content
+  a(href='..') <i class="fas fa-arrow-left"></i> Terug naar #{req.params.user}'s lijst
+  form(id='refreshform', method='POST', action=`${_CC.config.base}wishlist/${req.params.user}/refresh/${req.params.id}`)
+  form.inline(method='POST', action=`${_CC.config.base}wishlist/${req.params.user}/note/${req.params.id}`)
+    .columns
+      .column
+        .field
+          label.label Naam
+          .control
+            input.input(name='name', value=item.name)
+      .column
+        .field
+          label.label URL/Link
+          .control
+            input.input(name='url', value=item.url)
+      .column
+        .field
+          label.label Prijs
+          .control
+            input.input(name='price', value=item.price)
+      .column
+        .field
+          label.label Cadeau foto
+          .control
+            input.input(name='image', value=item.image)
+      .column.is-narrow
+          .field
+            label.label Cadeau product data
+            input.is-ghost.button(type='submit', value='Ververs data' style='width: 100%;', form='refreshform')
+    .field
+      label.label Informatie
+      .control
+        textarea.textarea(
+          name='note'
+        )= item.note
+    .field.inline
+      .control.inline
+        input.button.is-primary(type='submit' value='Opslaan')

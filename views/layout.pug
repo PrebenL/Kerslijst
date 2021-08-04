@@ -1,0 +1,42 @@
+doctype html
+html(lang='en')
+  head
+    meta(name='viewport', content='width=device-width, initial-scale=1, user-scalable=no')
+
+    link(rel='manifest', href=`${_CC.config.base}manifest.json`)
+    link(rel='apple-touch-icon', href=`${_CC.config.base}img/logo.png`, sizes='1280x1280')
+
+    if title
+      title #{config.siteTitle} - #{title}
+    else
+      title #{config.siteTitle}
+    link(rel='stylesheet', href=`${_CC.config.base}libraries/bulmaswatch/${_CC.config.bulmaswatch}/bulmaswatch.min.css`)
+    link(rel='stylesheet', href=`${_CC.config.base}libraries/fontawesome/css/all.css`)
+    link(rel='stylesheet', href=`${_CC.config.base}libraries/animate.min.css`)
+    link(rel='stylesheet', href=`${_CC.config.base}css/main.css`)
+  body
+    .print
+      .content
+        section.section(style='padding-bottom: 0;')
+          .container.is-marginless.fullwidth
+            block print
+              style.
+                .print { display: none !important; }
+                .notprint { display: block !important; }
+                @media print {
+                  .notprint-padding { display: none; }
+                  nav { display: none}
+                }
+    .notprint
+      include includes/navbar.pug
+      div.content.has-navbar-fixed-top#pageContent
+        div.notprint-padding(style='margin-top: 1.5em;')
+        section.section
+          div.container.is-marginless.fullwidth
+            block title
+              if title
+                h1= config.siteTitle + ' - ' + title
+              else if title !== false
+                h1 #{config.siteTitle}
+            include includes/messages.pug
+            block content
