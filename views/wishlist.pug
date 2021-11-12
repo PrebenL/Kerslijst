@@ -111,7 +111,7 @@ block content
                           .control.inline
                             input.inline.button(type='submit' value='Ongedaan maken')
                     if item.pledgedBy && item.pledgedBy !== req.user._id
-                      span.ugc Belooft door :)
+                      span.ugc Is belooft!
                 td(data-label='Verwijder Cadeau')
                   form.inline(
                     method='POST',
